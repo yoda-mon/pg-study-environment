@@ -1,0 +1,44 @@
+version: '3.9'
+services:
+  postgres-server:
+    build:
+      context: .
+      dockerfile: ./postgres.dockerfile
+    container_name: study-postgres-server
+    ports:
+      - "5432:5432"
+    environment: 
+      - POSTGRES_PASSWORD=bigdata
+      - PGDATA=/pgdata
+    volumes:
+      - ./data/pgdata:/pgdata
+    networks:
+      - study-network
+  postgres-client:
+    build:
+      context: .
+      dockerfile: ./postgres.dockerfile
+    container_name: study-postgres-client
+    tty: true
+    command: bash
+    networks:
+      - study-network
+  jupyter:
+    build: 
+      context: .
+      dockerfile: ./jupyter.dockerfile
+    container_name: study-postgres-jupyter
+    ports:
+      - 8888:8888
+    environment: 
+      - JUPYTER_ENABLE_LAB=true
+    volumes:
+      - ./data/work:/home/jovyan/work
+    command: >
+      start-notebook.sh
+      --NotebookApp.password=sha1:5330fe11ec03:9204c084c78cc72529b7e8835aa687341db6f569
+    networks:
+      - study-network
+networks:
+  study-network:
+    driver: bridge
